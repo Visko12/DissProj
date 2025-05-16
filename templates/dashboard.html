@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Moderation Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            background-color: #2d2d2d;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #363636;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            font-size: 1.1rem;
+            color: #a0a0a0;
+        }
+        .chart-container {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <h1 class="text-center mb-4">Discord Moderation Dashboard</h1>
+        
+        <!-- Statistics Cards -->
+        <h3 class="text-center mb-2">Discord Statistics</h3>
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Total Messages</div>
+                    <div class="stat-value" id="discord-total-messages">{{ stats_discord.total_messages }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Toxic Messages</div>
+                    <div class="stat-value" id="discord-toxic-messages">{{ stats_discord.toxic_messages }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Warnings Issued</div>
+                    <div class="stat-value" id="discord-warnings-issued">{{ stats_discord.warnings_issued }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Toxicity Percentage</div>
+                    <div class="stat-value" id="discord-toxicity-percentage">{{ "%.2f"|format(stats_discord.toxicity_percentage) }}%</div>
+                </div>
+            </div>
+        </div>
+        <!-- Twitch Statistics Cards -->
+        <h3 class="text-center mb-2">Twitch Statistics</h3>
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Total Messages</div>
+                    <div class="stat-value" id="twitch-total-messages">{{ stats_twitch.total_messages }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Toxic Messages</div>
+                    <div class="stat-value" id="twitch-toxic-messages">{{ stats_twitch.toxic_messages }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Warnings Issued</div>
+                    <div class="stat-value" id="twitch-warnings-issued">{{ stats_twitch.warnings_issued }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Toxicity Percentage</div>
+                    <div class="stat-value" id="twitch-toxicity-percentage">{{ "%.2f"|format(stats_twitch.toxicity_percentage) }}%</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Warning Distribution</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div id="warning-chart"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Toxicity Trend</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div id="toxicity-trend"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Parse and render the warning chart
+        var warningChart = {{ warning_chart | safe }};
+        Plotly.newPlot('warning-chart', warningChart.data, warningChart.layout);
+
+        // Parse and render the toxicity trend
+        var toxicityTrend = {{ toxicity_trend | safe }};
+        Plotly.newPlot('toxicity-trend', toxicityTrend.data, toxicityTrend.layout);
+
+        // Update stats every 30 seconds
+        setInterval(function() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('discord-total-messages').textContent = data.discord.total_messages;
+                    document.getElementById('discord-toxic-messages').textContent = data.discord.toxic_messages;
+                    document.getElementById('discord-warnings-issued').textContent = data.discord.warnings_issued;
+                    document.getElementById('discord-toxicity-percentage').textContent = data.discord.toxicity_percentage.toFixed(2) + '%';
+                    document.getElementById('twitch-total-messages').textContent = data.twitch.total_messages;
+                    document.getElementById('twitch-toxic-messages').textContent = data.twitch.toxic_messages;
+                    document.getElementById('twitch-warnings-issued').textContent = data.twitch.warnings_issued;
+                    document.getElementById('twitch-toxicity-percentage').textContent = data.twitch.toxicity_percentage.toFixed(2) + '%';
+                });
+        }, 30000);
+    </script>
+</body>
+</html> 

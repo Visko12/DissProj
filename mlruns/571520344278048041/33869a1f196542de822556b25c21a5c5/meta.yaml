@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/Ahmed/Dissertation/mlruns/571520344278048041/33869a1f196542de822556b25c21a5c5/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '571520344278048041'
+lifecycle_stage: active
+run_id: 33869a1f196542de822556b25c21a5c5
+run_name: persistent-sloth-162
+run_uuid: 33869a1f196542de822556b25c21a5c5
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747152736311
+status: 1
+tags: []
+user_id: Ahmed
